@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:frontend/features/auth/presentation/email_login_screen.dart';
 
 class LoginChoiceScreen extends StatelessWidget {
   const LoginChoiceScreen({super.key});
@@ -20,7 +21,16 @@ class LoginChoiceScreen extends StatelessWidget {
                 style: Theme.of(context).textTheme.headlineSmall,
               ),
               const SizedBox(height: 40),
-              OutlinedButton(onPressed: () {}, child: const Text('이메일로 계속하기')),
+              OutlinedButton(
+                onPressed: () {
+                  Navigator.of(context).push(
+                    MaterialPageRoute<void>(
+                      builder: (context) => const EmailLoginScreen(),
+                    ),
+                  );
+                },
+                child: const Text('이메일로 계속하기'),
+              ),
               const SizedBox(height: 12),
               OutlinedButton(
                 onPressed: () {},
