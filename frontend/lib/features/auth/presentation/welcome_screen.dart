@@ -6,8 +6,8 @@ class WelcomeScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final ColorScheme = Theme.of(context).colorScheme;
-    final TextTheme = Theme.of(context).textTheme;
+    final colorScheme = Theme.of(context).colorScheme;
+    final textTheme = Theme.of(context).textTheme;
 
     return Scaffold(
       body: SafeArea(
@@ -17,18 +17,18 @@ class WelcomeScreen extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               const Spacer(),
-              Icon(Icons.pets_rounded, size: 72, color: ColorScheme.primary),
+              Icon(Icons.pets_rounded, size: 72, color: colorScheme.primary),
               const SizedBox(height: 24),
               Text(
                 '멍로그',
                 textAlign: TextAlign.center,
-                style: TextTheme.headlineLarge,
+                style: textTheme.headlineLarge,
               ),
               const SizedBox(height: 12),
               Text(
                 '우리 아이와 함께한 오늘을,\n내일도 기억할 수 있도록.',
                 textAlign: TextAlign.center,
-                style: TextTheme.bodyLarge,
+                style: textTheme.bodyLarge,
               ),
               const Spacer(),
               FilledButton(
