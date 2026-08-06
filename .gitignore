@@ -1,0 +1,21 @@
+# 환경 변수와 비밀정보
+.env
+**/.env
+
+# Java / Gradle
+**/.gradle/
+**/build/
+*.class
+
+# IDE
+.idea/
+.vscode/
+*.iml
+
+# 로그
+*.log
+logs/
+
+# 운영체제
+.DS_Store
+Thumbs.db
