@@ -12,11 +12,13 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.verifyNoInteractions;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -115,5 +117,44 @@ class PetControllerTest {
                 .andExpect(
                         jsonPath("$.message")
                                 .value("사용자를 찾을 수 없습니다."));
+    }
+
+    @Test
+    void 반려견_목록을_조회하면_200과_목록을_반환한다()
+            throws Exception {
+
+        List<PetResponse> responses = List.of(
+                new PetResponse(
+                        2L,
+                        "마요",
+                        null,
+                        LocalDateTime.of(
+                                2026,
+                                8,
+                                8,
+                                10,
+                                30)),
+                new PetResponse(
+                        1L,
+                        "레오",
+                        null,
+                        LocalDateTime.of(
+                                2026,
+                                8,
+                                7,
+                                10,
+                                30)));
+
+        given(petService.findAll(1L))
+                .willReturn(responses);
+
+        mockMvc.perform(
+                get("/api/users/1/pets"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.length()").value(2))
+                .andExpect(jsonPath("$[0].id").value(2))
+                .andExpect(jsonPath("$[0].name").value("마요"))
+                .andExpect(jsonPath("$[1].id").value(1))
+                .andExpect(jsonPath("$[1].name").value("레오"));
     }
 }

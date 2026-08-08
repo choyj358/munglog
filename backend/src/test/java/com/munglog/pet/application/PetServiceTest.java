@@ -14,6 +14,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.util.List;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -81,5 +82,39 @@ class PetServiceTest {
                 .hasMessage("사용자를 찾을 수 없습니다.");
 
         verifyNoInteractions(petRepository);
+    }
+
+    @Test
+    void 반려견_목록을_최신순으로_조회한다() {
+        User user = new User(
+                "dev@munglog.local",
+                null);
+
+        Pet mayo = new Pet(
+                user,
+                "마요",
+                null);
+
+        Pet leo = new Pet(
+                user,
+                "레오",
+                null);
+
+        given(
+                userRepository.findByIdAndDeletedAtIsNull(1L))
+                .willReturn(Optional.of(user));
+
+        given(
+                petRepository
+                        .findAllByUser_IdAndDeletedAtIsNullOrderByCreatedAtDesc(1L))
+                .willReturn(List.of(mayo, leo));
+
+        List<PetResponse> responses = petService.findAll(1L);
+
+        assertThat(responses)
+                .extracting(PetResponse::name)
+                .containsExactly(
+                        "마요",
+                        "레오");
     }
 }
