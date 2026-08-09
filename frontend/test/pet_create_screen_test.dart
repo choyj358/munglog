@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:frontend/features/pet/application/pet_state.dart';
+import 'package:frontend/features/pet/infrastructure/pet_api.dart';
 import 'package:frontend/features/pet/presentation/pet_create_screen.dart';
 import 'package:frontend/features/pet/presentation/pet_onboarding_gate.dart';
+import 'package:http/http.dart' as http;
+import 'package:http/testing.dart';
 import 'package:provider/provider.dart';
 
 void main() {
@@ -26,14 +29,28 @@ void main() {
   });
 
   testWidgets('반려견을 등록하면 사진첩 화면으로 전환된다', (WidgetTester tester) async {
+    final client = MockClient((request) async {
+      return http.Response(
+        '[]',
+        200,
+        headers: {'content-type': 'application/json; charset=utf-8'},
+      );
+    });
+
+    final petApi = PetApi(client);
     final petState = PetState();
 
     await tester.pumpWidget(
-      ChangeNotifierProvider.value(
-        value: petState,
+      MultiProvider(
+        providers: [
+          Provider<PetApi>.value(value: petApi),
+          ChangeNotifierProvider<PetState>.value(value: petState),
+        ],
         child: const MaterialApp(home: PetOnboardingGate()),
       ),
     );
+
+    await tester.pumpAndSettle();
 
     expect(find.text('반려견 등록'), findsOneWidget);
 
