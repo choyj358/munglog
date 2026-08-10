@@ -44,4 +44,33 @@ void main() {
 
     expect(() => petApi.fetchPets(userId: '1'), throwsA(isA<Exception>()));
   });
+
+  test('반려견을 등록하고 서버 응답을 Pet으로 변환한다', () async {
+    final client = MockClient((request) async {
+      expect(request.method, 'POST');
+      expect(
+        request.url.toString(),
+        'https://api.munglog.test/api/users/1/pets',
+      );
+      expect(
+        request.headers['content-type'],
+        'application/json; charset=UTF-8',
+      );
+      expect(jsonDecode(request.body), {'name': '푸딩'});
+
+      return http.Response(
+        jsonEncode({'id': 3, 'name': '푸딩', 'profileImageUrl': null}),
+        201,
+        headers: {'content-type': 'application/json; charset=utf-8'},
+      );
+    });
+
+    final petApi = PetApi(client, baseUrl: 'https://api.munglog.test');
+
+    final pet = await petApi.createPet(userId: '1', name: '푸딩');
+
+    expect(pet.id, '3');
+    expect(pet.name, '푸딩');
+    expect(pet.profileImageUrl, isNull);
+  });
 }
