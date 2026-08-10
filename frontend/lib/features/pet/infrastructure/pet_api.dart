@@ -28,4 +28,23 @@ class PetApi {
         .map((item) => Pet.fromJson(item as Map<String, dynamic>))
         .toList();
   }
+
+  Future<Pet> createPet({required String userId, required String name}) async {
+    final uri = Uri.parse('$baseUrl/api/users/$userId/pets');
+
+    final response = await _client.post(
+      uri,
+      headers: {'Content-Type': 'application/json; charset=UTF-8'},
+      body: jsonEncode({'name': name}),
+    );
+
+    if (response.statusCode != 201) {
+      throw Exception('반려견을 등록하지 못했습니다. 상태 코드: ${response.statusCode}');
+    }
+
+    final decodedBody =
+        jsonDecode(utf8.decode(response.bodyBytes)) as Map<String, dynamic>;
+
+    return Pet.fromJson(decodedBody);
+  }
 }

@@ -2,9 +2,9 @@ import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
 import 'package:frontend/core/services/photo_picker_service.dart';
+import 'package:frontend/features/pet/infrastructure/pet_api.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:frontend/features/pet/application/pet_state.dart';
-import 'package:frontend/features/pet/domain/pet.dart';
 import 'package:provider/provider.dart';
 
 class PetCreateScreen extends StatefulWidget {
@@ -39,26 +39,39 @@ class _PetCreateScreenState extends State<PetCreateScreen> {
     });
   }
 
-  void _submit() {
+  Future<void> _submit() async {
     final isValid = _formKey.currentState?.validate() ?? false;
 
     if (!isValid) {
       return;
     }
 
-    final name = _nameController.text.trim();
+    final petState = context.read<PetState>();
 
-    // TODO: 반려견 등록 API 응답으로 받은 실제 ID로 교체합니다.
-    final pet = Pet(
-      id: 'local-${DateTime.now().microsecondsSinceEpoch}',
-      name: name,
+    if (petState.isSubmitting) {
+      return;
+    }
+
+    final success = await petState.createPet(
+      petApi: context.read<PetApi>(),
+      userId: '1',
+      name: _nameController.text.trim(),
     );
 
-    context.read<PetState>().addPet(pet);
+    if (!mounted || success) {
+      return;
+    }
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(petState.submitErrorMessage ?? '반려견을 등록하지 못했습니다.'),
+      ),
+    );
   }
 
   @override
   Widget build(BuildContext context) {
+    final petState = context.watch<PetState>();
     return Scaffold(
       appBar: AppBar(title: const Text('반려견 등록')),
       body: SafeArea(
@@ -106,7 +119,15 @@ class _PetCreateScreenState extends State<PetCreateScreen> {
                   },
                 ),
                 const SizedBox(height: 24),
-                FilledButton(onPressed: _submit, child: const Text('등록하기')),
+                FilledButton(
+                  onPressed: petState.isSubmitting ? null : _submit,
+                  child: petState.isSubmitting
+                      ? const SizedBox.square(
+                          dimension: 20,
+                          child: CircularProgressIndicator(strokeWidth: 2),
+                        )
+                      : const Text('등록하기'),
+                ),
               ],
             ),
           ),

@@ -10,6 +10,9 @@ class PetState extends ChangeNotifier {
   bool _isLoading = false;
   String? _errorMessage;
 
+  bool _isSubmitting = false;
+  String? _submitErrorMessage;
+
   UnmodifiableListView<Pet> get pets {
     return UnmodifiableListView(_pets);
   }
@@ -26,9 +29,40 @@ class PetState extends ChangeNotifier {
     return _errorMessage;
   }
 
+  bool get isSubmitting {
+    return _isSubmitting;
+  }
+
+  String? get submitErrorMessage {
+    return _submitErrorMessage;
+  }
+
   void addPet(Pet pet) {
     _pets.add(pet);
     notifyListeners();
+  }
+
+  Future<bool> createPet({
+    required PetApi petApi,
+    required String userId,
+    required String name,
+  }) async {
+    _isSubmitting = true;
+    _submitErrorMessage = null;
+    notifyListeners();
+
+    try {
+      final pet = await petApi.createPet(userId: userId, name: name);
+
+      _pets.add(pet);
+      return true;
+    } catch (error) {
+      _submitErrorMessage = '반려견을 등록하지 못했습니다.';
+      return false;
+    } finally {
+      _isSubmitting = false;
+      notifyListeners();
+    }
   }
 
   Future<void> loadPets({

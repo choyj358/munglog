@@ -50,4 +50,54 @@ void main() {
     expect(petState.errorMessage, '반려견 목록을 불러오지 못했습니다.');
     expect(petState.pets, isEmpty);
   });
+  test('반려견 등록에 성공하면 서버가 반환한 반려견을 목록에 추가한다', () async {
+    final client = MockClient((request) async {
+      return http.Response(
+        jsonEncode({'id': 3, 'name': '푸딩', 'profileImageUrl': null}),
+        201,
+        headers: {'content-type': 'application/json; charset=utf-8'},
+      );
+    });
+
+    final petApi = PetApi(client);
+    final petState = PetState();
+
+    final createFuture = petState.createPet(
+      petApi: petApi,
+      userId: '1',
+      name: '푸딩',
+    );
+
+    expect(petState.isSubmitting, isTrue);
+    expect(petState.submitErrorMessage, isNull);
+
+    final success = await createFuture;
+
+    expect(success, isTrue);
+    expect(petState.isSubmitting, isFalse);
+    expect(petState.submitErrorMessage, isNull);
+    expect(petState.pets, hasLength(1));
+    expect(petState.pets.first.id, '3');
+    expect(petState.pets.first.name, '푸딩');
+  });
+
+  test('반려견 등록에 실패하면 오류 상태를 저장한다', () async {
+    final client = MockClient((request) async {
+      return http.Response('', 500);
+    });
+
+    final petApi = PetApi(client);
+    final petState = PetState();
+
+    final success = await petState.createPet(
+      petApi: petApi,
+      userId: '1',
+      name: '푸딩',
+    );
+
+    expect(success, isFalse);
+    expect(petState.isSubmitting, isFalse);
+    expect(petState.submitErrorMessage, '반려견을 등록하지 못했습니다.');
+    expect(petState.pets, isEmpty);
+  });
 }
