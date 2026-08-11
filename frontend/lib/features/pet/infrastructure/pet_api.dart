@@ -1,10 +1,11 @@
 import 'dart:convert';
 
+import 'package:frontend/core/config/app_config.dart';
 import 'package:frontend/features/pet/domain/pet.dart';
 import 'package:http/http.dart' as http;
 
 class PetApi {
-  PetApi(this._client, {this.baseUrl = 'http://localhost:8080'});
+  PetApi(this._client, {this.baseUrl = AppConfig.apiBaseUrl});
 
   final http.Client _client;
   final String baseUrl;

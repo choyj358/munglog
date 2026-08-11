@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:frontend/core/config/app_config.dart';
 import 'package:frontend/core/theme/app_theme.dart';
 import 'package:frontend/features/auth/presentation/welcome_screen.dart';
 import 'package:frontend/features/pet/application/pet_state.dart';
@@ -19,7 +20,10 @@ class MungLogApp extends StatelessWidget {
         ),
         Provider<PetApi>(
           create: (context) {
-            return PetApi(context.read<http.Client>());
+            return PetApi(
+              context.read<http.Client>(),
+              baseUrl: AppConfig.apiBaseUrl,
+            );
           },
         ),
         ChangeNotifierProvider<PetState>(create: (context) => PetState()),
