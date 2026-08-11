@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:frontend/core/config/app_config.dart';
 import 'package:frontend/features/main/presentation/main_shell.dart';
 import 'package:frontend/features/pet/application/pet_state.dart';
 import 'package:frontend/features/pet/infrastructure/pet_api.dart';
@@ -33,7 +34,7 @@ class _PetOnboardingGateState extends State<PetOnboardingGate> {
 
     await context.read<PetState>().loadPets(
       petApi: context.read<PetApi>(),
-      userId: '1',
+      userId: AppConfig.devUserId,
     );
 
     if (!mounted) {

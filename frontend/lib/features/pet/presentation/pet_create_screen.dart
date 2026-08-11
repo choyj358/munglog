@@ -1,6 +1,7 @@
 import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
+import 'package:frontend/core/config/app_config.dart';
 import 'package:frontend/core/services/photo_picker_service.dart';
 import 'package:frontend/features/pet/infrastructure/pet_api.dart';
 import 'package:image_picker/image_picker.dart';
@@ -54,7 +55,7 @@ class _PetCreateScreenState extends State<PetCreateScreen> {
 
     final success = await petState.createPet(
       petApi: context.read<PetApi>(),
-      userId: '1',
+      userId: AppConfig.devUserId,
       name: _nameController.text.trim(),
     );
 
