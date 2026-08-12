@@ -4,6 +4,7 @@ import com.munglog.pet.domain.Pet;
 import com.munglog.pet.infrastructure.PetRepository;
 import com.munglog.pet.presentation.dto.PetCreateRequest;
 import com.munglog.pet.presentation.dto.PetResponse;
+import com.munglog.pet.presentation.dto.PetUpdateRequest;
 import com.munglog.user.domain.User;
 import com.munglog.user.infrastructure.UserRepository;
 import jakarta.persistence.EntityNotFoundException;
@@ -59,5 +60,25 @@ public class PetService {
         Pet savedPet = petRepository.save(pet);
 
         return PetResponse.from(savedPet);
+    }
+
+    @Transactional
+    public PetResponse update(
+            Long userId,
+            Long petId,
+            PetUpdateRequest request) {
+        Pet pet = petRepository
+                .findByIdAndUser_IdAndDeletedAtIsNull(
+                        petId,
+                        userId)
+                .orElseThrow(
+                        () -> new EntityNotFoundException(
+                                "반려견을 찾을 수 없습니다."));
+
+        String name = request.name().trim();
+
+        pet.changeName(name);
+
+        return PetResponse.from(pet);
     }
 }

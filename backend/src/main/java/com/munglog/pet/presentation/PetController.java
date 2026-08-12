@@ -3,9 +3,12 @@ package com.munglog.pet.presentation;
 import com.munglog.pet.application.PetService;
 import com.munglog.pet.presentation.dto.PetCreateRequest;
 import com.munglog.pet.presentation.dto.PetResponse;
+import com.munglog.pet.presentation.dto.PetUpdateRequest;
+
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -38,6 +41,17 @@ public class PetController {
             @Valid @RequestBody PetCreateRequest request) {
         return petService.create(
                 userId,
+                request);
+    }
+
+    @PatchMapping("/{petId}")
+    public PetResponse update(
+            @PathVariable Long userId,
+            @PathVariable Long petId,
+            @Valid @RequestBody PetUpdateRequest request) {
+        return petService.update(
+                userId,
+                petId,
                 request);
     }
 }

@@ -3,6 +3,8 @@ package com.munglog.pet.presentation;
 import com.munglog.pet.application.PetService;
 import com.munglog.pet.presentation.dto.PetCreateRequest;
 import com.munglog.pet.presentation.dto.PetResponse;
+import com.munglog.pet.presentation.dto.PetUpdateRequest;
+
 import jakarta.persistence.EntityNotFoundException;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,6 +24,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
 
 @WebMvcTest(PetController.class)
 class PetControllerTest {
@@ -156,5 +159,65 @@ class PetControllerTest {
                 .andExpect(jsonPath("$[0].name").value("마요"))
                 .andExpect(jsonPath("$[1].id").value(1))
                 .andExpect(jsonPath("$[1].name").value("레오"));
+    }
+
+    @Test
+    void 반려견_이름을_수정하면_200과_수정된_정보를_반환한다()
+            throws Exception {
+
+        PetResponse response = new PetResponse(
+                3L,
+                "레오",
+                null,
+                LocalDateTime.of(
+                        2026,
+                        8,
+                        12,
+                        10,
+                        30));
+
+        given(
+                petService.update(
+                        eq(1L),
+                        eq(3L),
+                        any(PetUpdateRequest.class)))
+                .willReturn(response);
+
+        mockMvc.perform(
+                patch("/api/users/1/pets/3")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {
+                                  "name": "레오"
+                                }
+                                """))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.id").value(3))
+                .andExpect(jsonPath("$.name").value("레오"))
+                .andExpect(
+                        jsonPath("$.profileImageUrl").isEmpty());
+    }
+
+    @Test
+    void 수정할_이름이_공백이면_400과_필드_오류를_반환한다()
+            throws Exception {
+
+        mockMvc.perform(
+                patch("/api/users/1/pets/3")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {
+                                  "name": "   "
+                                }
+                                """))
+                .andExpect(status().isBadRequest())
+                .andExpect(
+                        jsonPath("$.code")
+                                .value("INVALID_INPUT"))
+                .andExpect(
+                        jsonPath("$.fieldErrors.name")
+                                .value("반려견 이름을 입력해주세요."));
+
+        verifyNoInteractions(petService);
     }
 }
