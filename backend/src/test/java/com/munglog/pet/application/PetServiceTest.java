@@ -4,6 +4,7 @@ import com.munglog.pet.domain.Pet;
 import com.munglog.pet.infrastructure.PetRepository;
 import com.munglog.pet.presentation.dto.PetCreateRequest;
 import com.munglog.pet.presentation.dto.PetResponse;
+import com.munglog.pet.presentation.dto.PetUpdateRequest;
 import com.munglog.user.domain.User;
 import com.munglog.user.infrastructure.UserRepository;
 import jakarta.persistence.EntityNotFoundException;
@@ -116,5 +117,54 @@ class PetServiceTest {
                 .containsExactly(
                         "마요",
                         "레오");
+    }
+
+    @Test
+    void 반려견_이름을_수정한다() {
+        User user = new User(
+                "dev@munglog.local",
+                null);
+
+        Pet pet = new Pet(
+                user,
+                "푸딩",
+                null);
+
+        PetUpdateRequest request = new PetUpdateRequest("  레오  ");
+
+        given(
+                petRepository
+                        .findByIdAndUser_IdAndDeletedAtIsNull(
+                                3L,
+                                1L))
+                .willReturn(Optional.of(pet));
+
+        PetResponse response = petService.update(
+                1L,
+                3L,
+                request);
+
+        assertThat(pet.getName()).isEqualTo("레오");
+        assertThat(response.name()).isEqualTo("레오");
+    }
+
+    @Test
+    void 다른_사용자의_반려견은_수정할_수_없다() {
+        PetUpdateRequest request = new PetUpdateRequest("레오");
+
+        given(
+                petRepository
+                        .findByIdAndUser_IdAndDeletedAtIsNull(
+                                3L,
+                                999L))
+                .willReturn(Optional.empty());
+
+        assertThatThrownBy(
+                () -> petService.update(
+                        999L,
+                        3L,
+                        request))
+                .isInstanceOf(EntityNotFoundException.class)
+                .hasMessage("반려견을 찾을 수 없습니다.");
     }
 }
