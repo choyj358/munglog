@@ -259,4 +259,55 @@ class PetControllerTest {
                         jsonPath("$.message")
                                 .value("반려견을 찾을 수 없습니다."));
     }
+
+    @Test
+    void 삭제된_반려견을_복구하면_200과_복구된_정보를_반환한다()
+            throws Exception {
+
+        PetResponse response = new PetResponse(
+                2L,
+                "삭제검증용",
+                null,
+                LocalDateTime.of(
+                        2026,
+                        8,
+                        13,
+                        15,
+                        30));
+
+        given(
+                petService.restore(
+                        1L,
+                        2L))
+                .willReturn(response);
+
+        mockMvc.perform(
+                post("/api/users/1/pets/2/restore"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.id").value(2))
+                .andExpect(jsonPath("$.name").value("삭제검증용"));
+    }
+
+    @Test
+    void 복구할_반려견을_찾을_수_없으면_404를_반환한다()
+            throws Exception {
+
+        given(
+                petService.restore(
+                        1L,
+                        999L))
+                .willThrow(
+                        new EntityNotFoundException(
+                                "삭제된 반려견을 찾을 수 없습니다."));
+
+        mockMvc.perform(
+                post("/api/users/1/pets/999/restore"))
+                .andExpect(status().isNotFound())
+                .andExpect(
+                        jsonPath("$.code")
+                                .value("RESOURCE_NOT_FOUND"))
+                .andExpect(
+                        jsonPath("$.message")
+                                .value("삭제된 반려견을 찾을 수 없습니다."));
+    }
 }

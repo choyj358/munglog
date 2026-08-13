@@ -209,4 +209,49 @@ class PetServiceTest {
                 .isInstanceOf(EntityNotFoundException.class)
                 .hasMessage("반려견을 찾을 수 없습니다.");
     }
+
+    @Test
+    void 삭제된_반려견을_복구한다() {
+        User user = new User(
+                "dev@munglog.local",
+                null);
+
+        Pet pet = new Pet(
+                user,
+                "삭제검증용",
+                null);
+
+        pet.delete();
+
+        given(
+                petRepository
+                        .findByIdAndUser_IdAndDeletedAtIsNotNull(
+                                2L,
+                                1L))
+                .willReturn(Optional.of(pet));
+
+        PetResponse response = petService.restore(
+                1L,
+                2L);
+
+        assertThat(pet.getDeletedAt()).isNull();
+        assertThat(response.name()).isEqualTo("삭제검증용");
+    }
+
+    @Test
+    void 활성_반려견은_복구할_수_없다() {
+        given(
+                petRepository
+                        .findByIdAndUser_IdAndDeletedAtIsNotNull(
+                                1L,
+                                1L))
+                .willReturn(Optional.empty());
+
+        assertThatThrownBy(
+                () -> petService.restore(
+                        1L,
+                        1L))
+                .isInstanceOf(EntityNotFoundException.class)
+                .hasMessage("삭제된 반려견을 찾을 수 없습니다.");
+    }
 }

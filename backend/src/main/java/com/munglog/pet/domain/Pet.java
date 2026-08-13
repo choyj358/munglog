@@ -63,6 +63,10 @@ public class Pet extends BaseTimeEntity {
         deletedAt = LocalDateTime.now();
     }
 
+    public void restore() {
+        deletedAt = null;
+    }
+
     public Long getId() {
         return id;
     }

@@ -15,4 +15,8 @@ public interface PetRepository
     Optional<Pet> findByIdAndUser_IdAndDeletedAtIsNull(
             Long petId,
             Long userId);
+
+    Optional<Pet> findByIdAndUser_IdAndDeletedAtIsNotNull(
+            Long petId,
+            Long userId);
 }
