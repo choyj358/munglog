@@ -19,7 +19,10 @@ import java.util.List;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -219,5 +222,41 @@ class PetControllerTest {
                                 .value("반려견 이름을 입력해주세요."));
 
         verifyNoInteractions(petService);
+    }
+
+    @Test
+    void 반려견을_삭제하면_204를_반환한다()
+            throws Exception {
+
+        mockMvc.perform(
+                delete("/api/users/1/pets/1"))
+                .andExpect(status().isNoContent());
+
+        verify(petService).delete(
+                1L,
+                1L);
+    }
+
+    @Test
+    void 삭제할_반려견을_찾을_수_없으면_404를_반환한다()
+            throws Exception {
+
+        doThrow(
+                new EntityNotFoundException(
+                        "반려견을 찾을 수 없습니다."))
+                .when(petService)
+                .delete(
+                        999L,
+                        1L);
+
+        mockMvc.perform(
+                delete("/api/users/999/pets/1"))
+                .andExpect(status().isNotFound())
+                .andExpect(
+                        jsonPath("$.code")
+                                .value("RESOURCE_NOT_FOUND"))
+                .andExpect(
+                        jsonPath("$.message")
+                                .value("반려견을 찾을 수 없습니다."));
     }
 }
