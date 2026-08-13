@@ -167,4 +167,46 @@ class PetServiceTest {
                 .isInstanceOf(EntityNotFoundException.class)
                 .hasMessage("반려견을 찾을 수 없습니다.");
     }
+
+    @Test
+    void 반려견을_소프트_삭제한다() {
+        User user = new User(
+                "dev@munglog.local",
+                null);
+
+        Pet pet = new Pet(
+                user,
+                "레오",
+                null);
+
+        given(
+                petRepository
+                        .findByIdAndUser_IdAndDeletedAtIsNull(
+                                1L,
+                                1L))
+                .willReturn(Optional.of(pet));
+
+        petService.delete(
+                1L,
+                1L);
+
+        assertThat(pet.getDeletedAt()).isNotNull();
+    }
+
+    @Test
+    void 다른_사용자의_반려견은_삭제할_수_없다() {
+        given(
+                petRepository
+                        .findByIdAndUser_IdAndDeletedAtIsNull(
+                                1L,
+                                999L))
+                .willReturn(Optional.empty());
+
+        assertThatThrownBy(
+                () -> petService.delete(
+                        999L,
+                        1L))
+                .isInstanceOf(EntityNotFoundException.class)
+                .hasMessage("반려견을 찾을 수 없습니다.");
+    }
 }

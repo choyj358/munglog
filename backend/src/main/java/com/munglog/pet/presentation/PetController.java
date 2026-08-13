@@ -7,6 +7,7 @@ import com.munglog.pet.presentation.dto.PetUpdateRequest;
 
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -53,5 +54,15 @@ public class PetController {
                 userId,
                 petId,
                 request);
+    }
+
+    @DeleteMapping("/{petId}")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void delete(
+            @PathVariable Long userId,
+            @PathVariable Long petId) {
+        petService.delete(
+                userId,
+                petId);
     }
 }
