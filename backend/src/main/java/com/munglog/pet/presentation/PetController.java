@@ -65,4 +65,13 @@ public class PetController {
                 userId,
                 petId);
     }
+
+    @PostMapping("/{petId}/restore")
+    public PetResponse restore(
+            @PathVariable Long userId,
+            @PathVariable Long petId) {
+        return petService.restore(
+                userId,
+                petId);
+    }
 }

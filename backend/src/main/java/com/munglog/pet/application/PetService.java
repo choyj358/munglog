@@ -96,4 +96,21 @@ public class PetService {
 
         pet.delete();
     }
+
+    @Transactional
+    public PetResponse restore(
+            Long userId,
+            Long petId) {
+        Pet pet = petRepository
+                .findByIdAndUser_IdAndDeletedAtIsNotNull(
+                        petId,
+                        userId)
+                .orElseThrow(
+                        () -> new EntityNotFoundException(
+                                "삭제된 반려견을 찾을 수 없습니다."));
+
+        pet.restore();
+
+        return PetResponse.from(pet);
+    }
 }
