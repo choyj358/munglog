@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:frontend/features/album/presentation/album_home_screen.dart';
 import 'package:frontend/core/services/photo_picker_service.dart';
 import 'package:frontend/features/memory/presentation/memory_create_screen.dart';
+import 'package:frontend/features/settings/presentation/settings_screen.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:frontend/features/pet/application/pet_state.dart';
 import 'package:provider/provider.dart';
@@ -23,7 +24,7 @@ class _MainShellState extends State<MainShell> {
     AlbumHomeScreen(),
     _PreparingPage(message: '지도 화면을 준비하고 있어요.'),
     _PreparingPage(message: '추억 화면을 준비하고 있어요.'),
-    _PreparingPage(message: '설정 화면을 준비하고 있어요.'),
+    SettingsScreen(),
   ];
 
   void _selectDestination(int index) {

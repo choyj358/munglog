@@ -4,6 +4,7 @@ import 'package:frontend/core/theme/app_theme.dart';
 import 'package:frontend/features/auth/presentation/welcome_screen.dart';
 import 'package:frontend/features/pet/application/pet_state.dart';
 import 'package:frontend/features/pet/infrastructure/pet_api.dart';
+import 'package:frontend/features/pet/presentation/pet_onboarding_gate.dart';
 import 'package:http/http.dart' as http;
 import 'package:provider/provider.dart';
 
@@ -32,7 +33,9 @@ class MungLogApp extends StatelessWidget {
         debugShowCheckedModeBanner: false,
         title: '멍로그',
         theme: AppTheme.light,
-        home: const WelcomeScreen(),
+        home: AppConfig.skipAuth
+            ? const PetOnboardingGate()
+            : const WelcomeScreen(),
       ),
     );
   }

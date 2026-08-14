@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:frontend/features/pet/application/pet_state.dart';
+import 'package:frontend/features/pet/domain/pet.dart';
 import 'package:frontend/features/pet/infrastructure/pet_api.dart';
 import 'package:http/http.dart' as http;
 import 'package:http/testing.dart';
@@ -99,5 +100,104 @@ void main() {
     expect(petState.isSubmitting, isFalse);
     expect(petState.submitErrorMessage, '반려견을 등록하지 못했습니다.');
     expect(petState.pets, isEmpty);
+  });
+  test('반려견 수정에 성공하면 목록의 반려견을 교체한다', () async {
+    final client = MockClient((request) async {
+      expect(request.method, 'PATCH');
+
+      return http.Response(
+        jsonEncode({'id': 1, 'name': '레오', 'profileImageUrl': null}),
+        200,
+        headers: {'content-type': 'application/json; charset=utf-8'},
+      );
+    });
+
+    final petApi = PetApi(client);
+    final petState = PetState();
+
+    petState.addPet(const Pet(id: '1', name: '수정 전 이름'));
+
+    final updateFuture = petState.updatePet(
+      petApi: petApi,
+      userId: '1',
+      petId: '1',
+      name: '레오',
+    );
+
+    expect(petState.isSubmitting, isTrue);
+
+    final success = await updateFuture;
+
+    expect(success, isTrue);
+    expect(petState.isSubmitting, isFalse);
+    expect(petState.submitErrorMessage, isNull);
+    expect(petState.pets, hasLength(1));
+    expect(petState.pets.first.name, '레오');
+  });
+
+  test('반려견 삭제에 성공하면 목록에서 제거한다', () async {
+    final client = MockClient((request) async {
+      expect(request.method, 'DELETE');
+
+      return http.Response('', 204);
+    });
+
+    final petApi = PetApi(client);
+    final petState = PetState();
+
+    petState.addPet(const Pet(id: '1', name: '레오'));
+
+    final deleteFuture = petState.deletePet(
+      petApi: petApi,
+      userId: '1',
+      petId: '1',
+    );
+
+    expect(petState.isSubmitting, isTrue);
+
+    final success = await deleteFuture;
+
+    expect(success, isTrue);
+    expect(petState.isSubmitting, isFalse);
+    expect(petState.submitErrorMessage, isNull);
+    expect(petState.pets, isEmpty);
+  });
+  test('삭제된 반려견 복구에 성공하면 서버 목록을 다시 불러온다', () async {
+    final client = MockClient((request) async {
+      if (request.method == 'POST') {
+        expect(request.url.toString(), contains('/api/users/1/pets/1/restore'));
+
+        return http.Response(
+          jsonEncode({'id': 1, 'name': '레오', 'profileImageUrl': null}),
+          200,
+          headers: {'content-type': 'application/json; charset=utf-8'},
+        );
+      }
+
+      expect(request.method, 'GET');
+
+      return http.Response(
+        jsonEncode([
+          {'id': 1, 'name': '레오', 'profileImageUrl': null},
+        ]),
+        200,
+        headers: {'content-type': 'application/json; charset=utf-8'},
+      );
+    });
+
+    final petApi = PetApi(client);
+    final petState = PetState();
+
+    final success = await petState.restorePet(
+      petApi: petApi,
+      userId: '1',
+      petId: '1',
+    );
+
+    expect(success, isTrue);
+    expect(petState.isSubmitting, isFalse);
+    expect(petState.submitErrorMessage, isNull);
+    expect(petState.pets, hasLength(1));
+    expect(petState.pets.first.name, '레오');
   });
 }

@@ -10,4 +10,9 @@ class AppConfig {
     'DEV_USER_ID',
     defaultValue: '1',
   );
+
+  static const skipAuth = bool.fromEnvironment(
+    'SKIP_AUTH',
+    defaultValue: false,
+  );
 }
