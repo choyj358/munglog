@@ -73,4 +73,70 @@ void main() {
     expect(pet.name, '푸딩');
     expect(pet.profileImageUrl, isNull);
   });
+  test('반려견 이름 수정 요청을 보내고 수정된 반려견을 반환한다', () async {
+    final client = MockClient((request) async {
+      expect(request.method, 'PATCH');
+      expect(
+        request.url.toString(),
+        'https://api.munglog.test/api/users/1/pets/2',
+      );
+      expect(
+        request.headers['content-type'],
+        'application/json; charset=UTF-8',
+      );
+      expect(jsonDecode(request.body), {'name': '마요'});
+
+      return http.Response(
+        jsonEncode({'id': 2, 'name': '마요', 'profileImageUrl': null}),
+        200,
+        headers: {'content-type': 'application/json; charset=utf-8'},
+      );
+    });
+
+    final petApi = PetApi(client, baseUrl: 'https://api.munglog.test');
+
+    final pet = await petApi.updatePet(userId: '1', petId: '2', name: '마요');
+
+    expect(pet.id, '2');
+    expect(pet.name, '마요');
+  });
+
+  test('반려견 삭제 요청을 보낸다', () async {
+    final client = MockClient((request) async {
+      expect(request.method, 'DELETE');
+      expect(
+        request.url.toString(),
+        'https://api.munglog.test/api/users/1/pets/2',
+      );
+
+      return http.Response('', 204);
+    });
+
+    final petApi = PetApi(client, baseUrl: 'https://api.munglog.test');
+
+    await petApi.deletePet(userId: '1', petId: '2');
+  });
+
+  test('삭제된 반려견 복구 요청을 보내고 복구된 반려견을 반환한다', () async {
+    final client = MockClient((request) async {
+      expect(request.method, 'POST');
+      expect(
+        request.url.toString(),
+        'https://api.munglog.test/api/users/1/pets/2/restore',
+      );
+
+      return http.Response(
+        jsonEncode({'id': 2, 'name': '마요', 'profileImageUrl': null}),
+        200,
+        headers: {'content-type': 'application/json; charset=utf-8'},
+      );
+    });
+
+    final petApi = PetApi(client, baseUrl: 'https://api.munglog.test');
+
+    final pet = await petApi.restorePet(userId: '1', petId: '2');
+
+    expect(pet.id, '2');
+    expect(pet.name, '마요');
+  });
 }

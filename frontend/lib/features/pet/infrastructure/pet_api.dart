@@ -48,4 +48,67 @@ class PetApi {
 
     return Pet.fromJson(decodedBody);
   }
+
+  Future<Pet> updatePet({
+    required String userId,
+    required String petId,
+    required String name,
+  }) async {
+    final uri = Uri.parse('$baseUrl/api/users/$userId/pets/$petId');
+
+    final response = await _client.patch(
+      uri,
+      headers: {'Content-Type': 'application/json; charset=UTF-8'},
+      body: jsonEncode({'name': name}),
+    );
+
+    if (response.statusCode != 200) {
+      throw Exception(
+        '반려견 정보를 수정하지 못했습니다. '
+        '상태 코드: ${response.statusCode}',
+      );
+    }
+
+    final decodedBody =
+        jsonDecode(utf8.decode(response.bodyBytes)) as Map<String, dynamic>;
+
+    return Pet.fromJson(decodedBody);
+  }
+
+  Future<void> deletePet({
+    required String userId,
+    required String petId,
+  }) async {
+    final uri = Uri.parse('$baseUrl/api/users/$userId/pets/$petId');
+
+    final response = await _client.delete(uri);
+
+    if (response.statusCode != 204) {
+      throw Exception(
+        '반려견을 삭제하지 못했습니다. '
+        '상태 코드: ${response.statusCode}',
+      );
+    }
+  }
+
+  Future<Pet> restorePet({
+    required String userId,
+    required String petId,
+  }) async {
+    final uri = Uri.parse('$baseUrl/api/users/$userId/pets/$petId/restore');
+
+    final response = await _client.post(uri);
+
+    if (response.statusCode != 200) {
+      throw Exception(
+        '반려견을 복구하지 못했습니다. '
+        '상태 코드: ${response.statusCode}',
+      );
+    }
+
+    final decodedBody =
+        jsonDecode(utf8.decode(response.bodyBytes)) as Map<String, dynamic>;
+
+    return Pet.fromJson(decodedBody);
+  }
 }
