@@ -16,79 +16,92 @@ import java.util.Map;
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
-    private static final Logger log = LoggerFactory.getLogger(
-            GlobalExceptionHandler.class);
+        private static final Logger log = LoggerFactory.getLogger(
+                        GlobalExceptionHandler.class);
 
-    @ExceptionHandler(MethodArgumentNotValidException.class)
-    public ResponseEntity<ApiErrorResponse> handleValidation(
-            MethodArgumentNotValidException exception) {
-        Map<String, String> fieldErrors = new LinkedHashMap<>();
+        @ExceptionHandler(MethodArgumentNotValidException.class)
+        public ResponseEntity<ApiErrorResponse> handleValidation(
+                        MethodArgumentNotValidException exception) {
+                Map<String, String> fieldErrors = new LinkedHashMap<>();
 
-        exception.getBindingResult()
-                .getFieldErrors()
-                .forEach(error -> {
-                    String message = error.getDefaultMessage();
+                exception.getBindingResult()
+                                .getFieldErrors()
+                                .forEach(error -> {
+                                        String message = error.getDefaultMessage();
 
-                    if (message == null) {
-                        message = "올바른 값을 입력해주세요.";
-                    }
+                                        if (message == null) {
+                                                message = "올바른 값을 입력해주세요.";
+                                        }
 
-                    fieldErrors.putIfAbsent(
-                            error.getField(),
-                            message);
-                });
+                                        fieldErrors.putIfAbsent(
+                                                        error.getField(),
+                                                        message);
+                                });
 
-        ApiErrorResponse response = ApiErrorResponse.withFieldErrors(
-                HttpStatus.BAD_REQUEST.value(),
-                "INVALID_INPUT",
-                "입력값을 확인해주세요.",
-                fieldErrors);
+                ApiErrorResponse response = ApiErrorResponse.withFieldErrors(
+                                HttpStatus.BAD_REQUEST.value(),
+                                "INVALID_INPUT",
+                                "입력값을 확인해주세요.",
+                                fieldErrors);
 
-        return ResponseEntity
-                .status(HttpStatus.BAD_REQUEST)
-                .body(response);
-    }
+                return ResponseEntity
+                                .status(HttpStatus.BAD_REQUEST)
+                                .body(response);
+        }
 
-    @ExceptionHandler(EntityNotFoundException.class)
-    public ResponseEntity<ApiErrorResponse> handleNotFound(
-            EntityNotFoundException exception) {
-        ApiErrorResponse response = ApiErrorResponse.of(
-                HttpStatus.NOT_FOUND.value(),
-                "RESOURCE_NOT_FOUND",
-                exception.getMessage());
+        @ExceptionHandler(EntityNotFoundException.class)
+        public ResponseEntity<ApiErrorResponse> handleNotFound(
+                        EntityNotFoundException exception) {
+                ApiErrorResponse response = ApiErrorResponse.of(
+                                HttpStatus.NOT_FOUND.value(),
+                                "RESOURCE_NOT_FOUND",
+                                exception.getMessage());
 
-        return ResponseEntity
-                .status(HttpStatus.NOT_FOUND)
-                .body(response);
-    }
+                return ResponseEntity
+                                .status(HttpStatus.NOT_FOUND)
+                                .body(response);
+        }
 
-    @ExceptionHandler(HttpMessageNotReadableException.class)
-    public ResponseEntity<ApiErrorResponse> handleUnreadableMessage(
-            HttpMessageNotReadableException exception) {
-        ApiErrorResponse response = ApiErrorResponse.of(
-                HttpStatus.BAD_REQUEST.value(),
-                "INVALID_JSON",
-                "요청 내용을 읽을 수 없습니다.");
+        @ExceptionHandler(HttpMessageNotReadableException.class)
+        public ResponseEntity<ApiErrorResponse> handleUnreadableMessage(
+                        HttpMessageNotReadableException exception) {
+                ApiErrorResponse response = ApiErrorResponse.of(
+                                HttpStatus.BAD_REQUEST.value(),
+                                "INVALID_JSON",
+                                "요청 내용을 읽을 수 없습니다.");
 
-        return ResponseEntity
-                .status(HttpStatus.BAD_REQUEST)
-                .body(response);
-    }
+                return ResponseEntity
+                                .status(HttpStatus.BAD_REQUEST)
+                                .body(response);
+        }
 
-    @ExceptionHandler(Exception.class)
-    public ResponseEntity<ApiErrorResponse> handleUnexpected(
-            Exception exception) {
-        log.error(
-                "처리되지 않은 서버 오류가 발생했습니다.",
-                exception);
+        @ExceptionHandler(IllegalArgumentException.class)
+        public ResponseEntity<ApiErrorResponse> handleIllegalArgument(
+                        IllegalArgumentException exception) {
+                ApiErrorResponse response = ApiErrorResponse.of(
+                                HttpStatus.BAD_REQUEST.value(),
+                                "INVALID_INPUT",
+                                exception.getMessage());
 
-        ApiErrorResponse response = ApiErrorResponse.of(
-                HttpStatus.INTERNAL_SERVER_ERROR.value(),
-                "INTERNAL_SERVER_ERROR",
-                "서버 오류가 발생했습니다.");
+                return ResponseEntity
+                                .status(HttpStatus.BAD_REQUEST)
+                                .body(response);
+        }
 
-        return ResponseEntity
-                .status(HttpStatus.INTERNAL_SERVER_ERROR)
-                .body(response);
-    }
+        @ExceptionHandler(Exception.class)
+        public ResponseEntity<ApiErrorResponse> handleUnexpected(
+                        Exception exception) {
+                log.error(
+                                "처리되지 않은 서버 오류가 발생했습니다.",
+                                exception);
+
+                ApiErrorResponse response = ApiErrorResponse.of(
+                                HttpStatus.INTERNAL_SERVER_ERROR.value(),
+                                "INTERNAL_SERVER_ERROR",
+                                "서버 오류가 발생했습니다.");
+
+                return ResponseEntity
+                                .status(HttpStatus.INTERNAL_SERVER_ERROR)
+                                .body(response);
+        }
 }
